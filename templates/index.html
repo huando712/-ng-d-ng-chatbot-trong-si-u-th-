@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Siêu Thị ABC - Trợ Lý Mua Sắm AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ========== THEME ========== */
+        :root, [data-theme="light"] {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --primary-light: #d1fae5;
+            --primary-glow: rgba(16,185,129,0.15);
+            --accent: #f59e0b;
+            --accent-light: #fef3c7;
+            --danger: #ef4444;
+            --bg: #f8fafb;
+            --bg-chat: #f1f5f9;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --text: #0f172a;
+            --text-2: #475569;
+            --text-3: #94a3b8;
+            --border: #e2e8f0;
+            --border-2: #f1f5f9;
+            --user-bg: linear-gradient(135deg, #10b981, #059669);
+            --bot-bg: #ffffff;
+            --bot-text: #0f172a;
+            --input-bg: #ffffff;
+            --shadow: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+            --shadow-lg: 0 12px 40px rgba(0,0,0,0.1);
+            --card-bg: #ffffff;
+        }
+        [data-theme="dark"] {
+            --primary: #34d399;
+            --primary-dark: #10b981;
+            --primary-light: #064e3b;
+            --primary-glow: rgba(52,211,153,0.12);
+            --accent: #fbbf24;
+            --accent-light: #451a03;
+            --danger: #f87171;
+            --bg: #0f172a;
+            --bg-chat: #1e293b;
+            --surface: #1e293b;
+            --surface-2: #334155;
+            --text: #f1f5f9;
+            --text-2: #94a3b8;
+            --text-3: #64748b;
+            --border: #334155;
+            --border-2: #1e293b;
+            --user-bg: linear-gradient(135deg, #10b981, #059669);
+            --bot-bg: #1e293b;
+            --bot-text: #e2e8f0;
+            --input-bg: #1e293b;
+            --shadow: 0 1px 3px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.35);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.4);
+            --card-bg: #334155;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text);
+            transition: background 0.35s, color 0.35s;
+        }
+        [data-theme="light"] body { background: linear-gradient(160deg, #ecfdf5, #f0f9ff 50%, #fefce8); }
+        [data-theme="dark"] body { background: linear-gradient(160deg, #0f172a, #1a1a2e 50%, #16213e); }
+
+        /* ========== LAYOUT ========== */
+        .app {
+            width: 520px; max-width: 100vw;
+            height: 97dvh; max-height: 920px;
+            display: flex; flex-direction: column;
+            background: var(--bg);
+            border-radius: 28px;
+            box-shadow: var(--shadow-lg), 0 0 40px var(--primary-glow);
+            overflow: hidden;
+            border: 1px solid var(--border-2);
+            transition: background 0.35s;
+        }
+
+        /* ========== HEADER ========== */
+        .header {
+            background: linear-gradient(135deg, #059669, #047857, #065f46);
+            color: white; padding: 14px 18px;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-shrink: 0; position: relative; overflow: hidden;
+        }
+        .header::before {
+            content: ''; position: absolute; top: -60%; right: -12%;
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(255,255,255,0.07), transparent);
+            border-radius: 50%;
+        }
+        .h-left { display: flex; align-items: center; gap: 12px; z-index: 1; }
+        .h-logo {
+            width: 46px; height: 46px;
+            background: rgba(255,255,255,0.13); backdrop-filter: blur(12px);
+            border-radius: 14px; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; border: 1px solid rgba(255,255,255,0.12);
+        }
+        .h-title { font-size: 17px; font-weight: 800; letter-spacing: -0.4px; }
+        .h-status { font-size: 11px; opacity: 0.85; display: flex; align-items: center; gap: 5px; margin-top: 1px; font-weight: 500; }
+        .dot { width: 7px; height: 7px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 6px #4ade80; animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 6px #4ade80}50%{opacity:.5;box-shadow:0 0 12px #4ade80} }
+        .h-right { display: flex; gap: 6px; z-index: 1; align-items: center; }
+        .h-btn {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.12);
+            color: white; width: 38px; height: 38px; border-radius: 12px;
+            cursor: pointer; transition: all 0.2s; font-size: 17px;
+            display: flex; align-items: center; justify-content: center; font-family: inherit;
+        }
+        .h-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
+        .cart-btn {
+            background: rgba(255,255,255,0.13); border: 1px solid rgba(255,255,255,0.15);
+            color: white; padding: 7px 14px; border-radius: 12px;
+            font-size: 12.5px; font-weight: 700; cursor: pointer;
+            transition: all 0.2s; font-family: inherit;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .cart-btn:hover { background: rgba(255,255,255,0.22); }
+        .badge {
+            background: var(--danger); color: white; font-size: 10px; font-weight: 800;
+            min-width: 20px; height: 20px; border-radius: 10px;
+            display: inline-flex; align-items: center; justify-content: center;
+            transition: all 0.3s;
+        }
+        .badge.glow { box-shadow: 0 0 8px rgba(239,68,68,0.5); }
+
+        /* ========== PROMO ========== */
+        .promo {
+            background: var(--accent-light); border-bottom: 1px solid var(--border);
+            padding: 9px 18px; display: flex; align-items: center; gap: 8px;
+            font-size: 12px; flex-shrink: 0; overflow: hidden;
+        }
+        .promo-icon { font-size: 15px; flex-shrink: 0; }
+        .promo-track {
+            overflow: hidden; flex: 1;
+            mask-image: linear-gradient(90deg, transparent, black 5%, black 95%, transparent);
+        }
+        .promo-text {
+            white-space: nowrap; display: inline-block;
+            animation: scroll 28s linear infinite;
+            color: var(--text-2); font-weight: 500;
+        }
+        @keyframes scroll { 0%{transform:translateX(100%)}100%{transform:translateX(-100%)} }
+
+        /* ========== CHAT AREA ========== */
+        .chat-wrap { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+        .chat-area {
+            flex: 1; overflow-y: auto; padding: 16px 14px;
+            display: flex; flex-direction: column; gap: 8px;
+            background: var(--bg-chat); scroll-behavior: smooth;
+            transition: background 0.35s;
+        }
+        .chat-area::-webkit-scrollbar { width: 4px; }
+        .chat-area::-webkit-scrollbar-thumb { background: var(--text-3); border-radius: 10px; }
+        .scroll-down {
+            position: absolute; bottom: 14px; left: 50%;
+            transform: translateX(-50%) scale(0);
+            width: 38px; height: 38px; border-radius: 50%;
+            background: var(--surface); border: 1px solid var(--border);
+            box-shadow: var(--shadow-md); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; transition: all 0.3s; z-index: 5; color: var(--text-2);
+        }
+        .scroll-down.show { transform: translateX(-50%) scale(1); }
+        .scroll-down:hover { background: var(--primary); color: white; }
+
+        /* ========== MESSAGES ========== */
+        .msg {
+            display: flex; gap: 8px; max-width: 88%;
+            animation: msgIn 0.35s cubic-bezier(0.16,1,0.3,1);
+        }
+        .msg.user { flex-direction: row-reverse; align-self: flex-end; }
+        .msg.bot { align-self: flex-start; }
+        @keyframes msgIn { from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none} }
+
+        .avatar {
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 17px; flex-shrink: 0; box-shadow: var(--shadow);
+        }
+        .msg-body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+        .bubble {
+            padding: 11px 15px; border-radius: 18px;
+            font-size: 13.5px; line-height: 1.65;
+            white-space: pre-wrap; word-break: break-word;
+            transition: background 0.35s;
+        }
+        .msg.bot .bubble {
+            background: var(--bot-bg); color: var(--bot-text);
+            border-top-left-radius: 5px;
+            box-shadow: var(--shadow); border: 1px solid var(--border-2);
+        }
+        .msg.user .bubble {
+            background: var(--user-bg); color: #fff;
+            border-top-right-radius: 5px;
+            box-shadow: 0 2px 10px rgba(16,185,129,0.2);
+        }
+        .meta {
+            font-size: 10px; color: var(--text-3);
+            padding: 0 4px; display: flex; align-items: center; gap: 4px;
+        }
+        .msg.user .meta { justify-content: flex-end; }
+
+        /* Typing */
+        .typing { display:none; align-items:center; gap:8px; padding:4px 0; }
+        .typing.show { display:flex; }
+        .typing-dots {
+            background: var(--bot-bg); padding: 13px 18px;
+            border-radius: 18px; border-top-left-radius: 5px;
+            display: flex; gap: 5px; box-shadow: var(--shadow);
+            border: 1px solid var(--border-2);
+        }
+        .typing-dots span {
+            width: 7px; height: 7px; background: var(--text-3);
+            border-radius: 50%; animation: dotP 1.4s ease-in-out infinite;
+        }
+        .typing-dots span:nth-child(2){animation-delay:.15s}
+        .typing-dots span:nth-child(3){animation-delay:.3s}
+        @keyframes dotP { 0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1} }
+
+        /* ========== RICH CARDS (from backend HTML) ========== */
+        .cards-title {
+            font-size: 14px; font-weight: 700; color: var(--text);
+            margin-bottom: 10px; padding-bottom: 6px;
+            border-bottom: 2px solid var(--primary); display: inline-block;
+        }
+
+        /* Product Grid */
+        .product-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 8px; margin-top: 6px;
+        }
+        .product-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 14px; padding: 12px; display: flex; flex-direction: column;
+            gap: 4px; transition: all 0.2s; cursor: default;
+        }
+        .product-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .pc-icon { font-size: 28px; text-align: center; margin-bottom: 2px; }
+        .pc-body { display: flex; flex-direction: column; gap: 3px; }
+        .pc-name { font-size: 12.5px; font-weight: 600; color: var(--text); line-height: 1.4; }
+        .pc-price { font-size: 14px; font-weight: 800; color: var(--primary); }
+        .pc-stars { font-size: 11px; color: var(--accent); }
+        .pc-stars span { color: var(--text-3); font-size: 10.5px; margin-left: 2px; }
+        .pc-loc { font-size: 10.5px; color: var(--text-3); }
+        .pc-promo {
+            font-size: 10.5px; color: var(--danger); font-weight: 600;
+            background: #fef2f2; padding: 3px 8px; border-radius: 8px;
+            margin-top: 2px;
+        }
+        [data-theme="dark"] .pc-promo { background: rgba(239,68,68,0.1); }
+        .pc-buy {
+            margin-top: 6px; padding: 7px 0; border: none;
+            border-radius: 10px; font-size: 12px; font-weight: 700;
+            background: var(--primary); color: white; cursor: pointer;
+            transition: all 0.2s; font-family: inherit;
+        }
+        .pc-buy:hover { background: var(--primary-dark); transform: scale(1.02); }
+
+        /* Compare Grid */
+        .compare-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 10px; margin-top: 8px;
+        }
+        .cmp-col {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 14px; padding: 14px; text-align: center;
+            display: flex; flex-direction: column; gap: 6px;
+        }
+        .cmp-icon { font-size: 32px; }
+        .cmp-name { font-size: 13px; font-weight: 600; color: var(--text); }
+        .cmp-price { font-size: 16px; font-weight: 800; color: var(--primary); }
+        .cmp-stars { font-size: 13px; color: var(--accent); }
+        .cmp-detail { font-size: 11px; color: var(--text-3); }
+        .cmp-promo { color: var(--danger); font-weight: 600; }
+        .cmp-none { color: var(--text-3); }
+
+        /* Combo Cards */
+        .combo-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+        .combo-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 16px; padding: 16px; transition: all 0.2s;
+        }
+        .combo-card:hover { box-shadow: var(--shadow-md); }
+        .combo-header { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+        .combo-items { display: flex; flex-direction: column; gap: 4px; }
+        .combo-item { font-size: 12.5px; color: var(--text-2); padding: 4px 0; }
+        .combo-footer { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); }
+        .combo-old { font-size: 12px; color: var(--text-3); }
+        .combo-save { font-size: 13px; color: var(--danger); font-weight: 600; }
+        .combo-final { font-size: 16px; font-weight: 800; color: var(--primary); margin-top: 2px; }
+        .combo-buy { width: 100%; margin-top: 10px; padding: 10px; font-size: 13px; }
+
+        /* Cart Card */
+        .cart-card { display: flex; flex-direction: column; gap: 6px; }
+        .cart-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 10px; background: var(--surface-2);
+            border-radius: 10px; transition: background 0.2s;
+        }
+        .cart-row:hover { background: var(--primary-light); }
+        .cart-icon { font-size: 22px; flex-shrink: 0; }
+        .cart-detail { flex: 1; min-width: 0; }
+        .cart-name { font-size: 12.5px; font-weight: 600; color: var(--text); }
+        .cart-sub { font-size: 12px; color: var(--primary); font-weight: 700; }
+        .cart-del {
+            width: 28px; height: 28px; border-radius: 8px;
+            border: 1px solid var(--border); background: var(--surface);
+            color: var(--danger); cursor: pointer; font-size: 13px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .cart-del:hover { background: var(--danger); color: white; border-color: var(--danger); }
+        .cart-divider { height: 1px; background: var(--border); margin: 6px 0; }
+        .cart-total-row {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 13px; color: var(--text-2); padding: 2px 4px;
+        }
+        .cart-total-row.final { font-size: 15px; font-weight: 800; color: var(--primary); }
+        .cart-actions { display: flex; gap: 8px; margin-top: 8px; }
+        .cart-actions .pc-buy { flex: 1; }
+        .cart-clear {
+            flex: 1; padding: 8px; border: 1px solid var(--border);
+            border-radius: 10px; background: var(--surface);
+            color: var(--text-2); font-size: 12px; font-weight: 600;
+            cursor: pointer; font-family: inherit; transition: all 0.2s;
+        }
+        .cart-clear:hover { border-color: var(--danger); color: var(--danger); }
+
+        /* Checkout */
+        .checkout-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 16px; padding: 18px;
+        }
+        .ck-header {
+            font-size: 16px; font-weight: 800; color: var(--text);
+            margin-bottom: 12px; text-align: center;
+        }
+        .ck-items { display: flex; flex-direction: column; gap: 4px; }
+        .ck-row { font-size: 13px; color: var(--text-2); padding: 3px 0; }
+        .ck-info { font-size: 12px; color: var(--text-3); text-align: center; margin-top: 10px; line-height: 1.6; }
+        .ck-success {
+            text-align: center; font-size: 15px; font-weight: 700;
+            color: var(--primary); margin-top: 12px; padding: 10px;
+            background: var(--primary-light); border-radius: 10px;
+        }
+
+        /* Category Grid */
+        .cat-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 8px; margin-top: 8px;
+        }
+        .cat-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 12px; padding: 12px 8px; text-align: center;
+            cursor: pointer; transition: all 0.2s;
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+        }
+        .cat-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow); }
+        .cat-icon { font-size: 24px; }
+        .cat-name { font-size: 11px; font-weight: 600; color: var(--text); text-transform: capitalize; }
+        .cat-count { font-size: 10px; color: var(--text-3); }
+
+        /* Suggest Chips */
+        .suggest-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+        .suggest-chip {
+            padding: 6px 13px; background: var(--primary-light); color: var(--primary-dark);
+            border-radius: 18px; font-size: 11.5px; font-weight: 600;
+            cursor: pointer; border: none; transition: all 0.2s; font-family: inherit;
+        }
+        .suggest-chip:hover { background: var(--primary); color: white; transform: translateY(-1px); }
+
+        /* ========== WELCOME ========== */
+        .welcome {
+            background: var(--surface); border-radius: 18px;
+            padding: 22px 18px; border: 1px solid var(--border);
+            box-shadow: var(--shadow); animation: welcomeIn 0.5s cubic-bezier(0.16,1,0.3,1);
+            transition: background 0.35s;
+        }
+        @keyframes welcomeIn { from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:none} }
+        .w-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+        .w-icon {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 14px; display: flex; align-items: center; justify-content: center;
+            font-size: 26px; box-shadow: 0 4px 12px var(--primary-glow);
+        }
+        .w-title { font-size: 17px; font-weight: 800; letter-spacing: -0.3px; }
+        .w-sub { font-size: 12.5px; color: var(--text-2); font-weight: 500; }
+        .w-features {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 6px; margin-bottom: 14px;
+        }
+        .w-feat {
+            display: flex; align-items: center; gap: 7px;
+            padding: 8px 10px; background: var(--bg-chat);
+            border-radius: 10px; font-size: 12px; font-weight: 500; color: var(--text-2);
+            transition: all 0.2s; cursor: pointer;
+        }
+        .w-feat:hover { background: var(--primary-light); color: var(--primary-dark); }
+        .w-feat span:first-child { font-size: 17px; }
+        .w-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+        .w-btn {
+            padding: 9px 16px; border: none; border-radius: 20px;
+            font-size: 12.5px; font-weight: 600; cursor: pointer;
+            font-family: inherit; transition: all 0.2s;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .w-btn.pri {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; box-shadow: 0 3px 10px var(--primary-glow);
+        }
+        .w-btn.pri:hover { transform: translateY(-2px); box-shadow: 0 5px 16px var(--primary-glow); }
+        .w-btn.sec { background: var(--bg-chat); color: var(--text); border: 1px solid var(--border); }
+        .w-btn.sec:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* ========== QUICK BAR ========== */
+        .quick-bar {
+            padding: 10px 14px; display: flex; gap: 7px;
+            overflow-x: auto; flex-shrink: 0;
+            background: var(--surface); border-top: 1px solid var(--border);
+            transition: background 0.35s;
+        }
+        .quick-bar::-webkit-scrollbar { height: 0; }
+        .qbtn {
+            white-space: nowrap; padding: 8px 16px;
+            border: 1.5px solid var(--border); border-radius: 22px;
+            background: var(--surface); color: var(--text);
+            font-size: 12px; font-weight: 600; cursor: pointer;
+            transition: all 0.2s; flex-shrink: 0; font-family: inherit;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .qbtn:hover {
+            border-color: var(--primary); color: var(--primary);
+            background: var(--primary-light);
+            transform: translateY(-1px); box-shadow: 0 3px 10px var(--primary-glow);
+        }
+        .qbtn:active { transform: scale(.97); }
+
+        /* ========== INPUT ========== */
+        .input-bar {
+            display: flex; gap: 8px; padding: 12px 14px 16px;
+            background: var(--surface); flex-shrink: 0;
+            transition: background 0.35s; align-items: center;
+        }
+        .input-wrap { flex: 1; position: relative; }
+        .input-wrap input {
+            width: 100%; padding: 13px 46px 13px 18px;
+            border: 2px solid var(--border); border-radius: 26px;
+            font-size: 14px; outline: none; font-family: inherit;
+            transition: all 0.25s; background: var(--input-bg); color: var(--text);
+        }
+        .input-wrap input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+        .input-wrap input::placeholder { color: var(--text-3); }
+        .voice-btn {
+            position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+            width: 34px; height: 34px; border-radius: 50%;
+            border: none; background: transparent; color: var(--text-3);
+            cursor: pointer; font-size: 18px; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .voice-btn:hover { color: var(--primary); background: var(--primary-light); }
+        .voice-btn.recording { color: var(--danger); background: rgba(239,68,68,0.1); animation: recPulse 1s infinite; }
+        @keyframes recPulse { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.3)}50%{box-shadow:0 0 0 8px rgba(239,68,68,0)} }
+        .send-btn {
+            width: 50px; height: 50px; border: none; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; box-shadow: 0 4px 14px var(--primary-glow);
+        }
+        .send-btn:hover { transform: scale(1.07) translateY(-1px); }
+        .send-btn:active { transform: scale(.95); }
+        .send-btn svg { width: 21px; height: 21px; fill: white; }
+
+        /* Autocomplete */
+        .autocomplete {
+            position: absolute; bottom: 100%; left: 0; right: 0;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 14px; box-shadow: var(--shadow-md);
+            margin-bottom: 6px; overflow: hidden; display: none; z-index: 20;
+        }
+        .autocomplete.show { display: block; }
+        .ac-item {
+            padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+            cursor: pointer; transition: background 0.15s;
+            font-size: 13px; color: var(--text);
+        }
+        .ac-item:hover { background: var(--primary-light); }
+        .ac-icon { font-size: 18px; }
+        .ac-name { flex: 1; font-weight: 500; }
+        .ac-price { font-size: 12px; color: var(--primary); font-weight: 700; }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width:540px) {
+            body { background: var(--bg) !important; }
+            .app { width:100%; height:100dvh; max-height:100%; border-radius:0; box-shadow:none; border:none; }
+            .product-grid { grid-template-columns: 1fr 1fr; }
+            .cat-grid { grid-template-columns: repeat(3, 1fr); }
+            .w-features { grid-template-columns: 1fr; }
+            .msg { max-width: 92%; }
+        }
+        @media (max-width:360px) {
+            .product-grid { grid-template-columns: 1fr; }
+            .cat-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="header">
+        <div class="h-left">
+            <div class="h-logo">🛒</div>
+            <div>
+                <div class="h-title">Siêu Thị ABC</div>
+                <div class="h-status"><span class="dot"></span> <span id="aiStatus">Trợ lý đang hoạt động</span></div>
+            </div>
+        </div>
+        <div class="h-right">
+            <button class="h-btn" onclick="toggleTheme()" id="themeBtn" title="Đổi giao diện">🌙</button>
+            <button class="h-btn" onclick="toggleSound()" id="soundBtn" title="Bật/tắt âm thanh">🔔</button>
+            <button class="cart-btn" onclick="quickSend('giỏ hàng')" title="Giỏ hàng">
+                🛒 <span class="badge" id="cartCount">0</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="promo">
+        <span class="promo-icon">🔥</span>
+        <div class="promo-track">
+            <span class="promo-text">KHUYẾN MÃI: Miễn phí ship đơn 200K+ &nbsp;•&nbsp; Sữa Grow Plus -15% &nbsp;•&nbsp; OMO -30K &nbsp;•&nbsp; Trà xanh mua 2 tặng 1 &nbsp;•&nbsp; Bò Úc -20% &nbsp;•&nbsp; COMBO LẨU giảm 10%</span>
+        </div>
+    </div>
+
+    <div class="chat-wrap">
+        <div class="chat-area" id="chatArea">
+            <div class="typing" id="typing">
+                <div class="avatar">🤖</div>
+                <div class="typing-dots"><span></span><span></span><span></span></div>
+            </div>
+        </div>
+        <button class="scroll-down" id="scrollBtn" onclick="scrollBottom()">↓</button>
+    </div>
+
+    <div class="quick-bar">
+        <button class="qbtn" onclick="quickSend('sữa nào tốt cho trẻ 2 tuổi?')">🍼 Tư vấn sữa</button>
+        <button class="qbtn" onclick="quickSend('xem khuyến mãi')">🎁 Khuyến mãi</button>
+        <button class="qbtn" onclick="quickSend('combo')">🎉 Combo</button>
+        <button class="qbtn" onclick="quickSend('danh mục')">📂 Danh mục</button>
+        <button class="qbtn" onclick="quickSend('sản phẩm hot')">⭐ Bán chạy</button>
+        <button class="qbtn" onclick="quickSend('tôi có 200k mua gì')">💰 Ngân sách</button>
+        <button class="qbtn" onclick="quickSend('nấu lẩu cần gì')">🍳 Nấu ăn</button>
+        <button class="qbtn" onclick="quickSend('bản đồ')">🗺️ Sơ đồ</button>
+        <button class="qbtn" onclick="quickSend('help')">❓ Trợ giúp</button>
+    </div>
+
+    <div class="input-bar">
+        <div class="input-wrap">
+            <input type="text" id="msgInput" placeholder="Hỏi về sản phẩm, giá, vị trí, combo..." autocomplete="off">
+            <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()" title="Nhập giọng nói">🎤</button>
+            <div class="autocomplete" id="acBox"></div>
+        </div>
+        <button class="send-btn" onclick="sendMessage()" title="Gửi">
+            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+    </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const chatArea = $('chatArea'), msgInput = $('msgInput'), typingEl = $('typing');
+const cartCountEl = $('cartCount'), scrollBtn = $('scrollBtn');
+const themeBtn = $('themeBtn'), soundBtn = $('soundBtn');
+const voiceBtn = $('voiceBtn'), acBox = $('acBox');
+
+let soundOn = true;
+let recognition = null;
+
+// ===== THEME =====
+const getTheme = () => localStorage.getItem('theme') || 'light';
+function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+    localStorage.setItem('theme', t);
+}
+function toggleTheme() { applyTheme(getTheme() === 'light' ? 'dark' : 'light'); }
+applyTheme(getTheme());
+
+// ===== SOUND =====
+function playSound(type) {
+    if (!soundOn) return;
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    gain.gain.value = 0.08;
+    if (type === 'send') { osc.frequency.value = 600; osc.type = 'sine'; }
+    else if (type === 'receive') { osc.frequency.value = 800; osc.type = 'sine'; }
+    else { osc.frequency.value = 400; osc.type = 'sine'; }
+    osc.start(); osc.stop(ctx.currentTime + 0.1);
+}
+function toggleSound() {
+    soundOn = !soundOn;
+    soundBtn.textContent = soundOn ? '🔔' : '🔕';
+}
+
+// ===== VOICE INPUT =====
+function toggleVoice() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert('Trình duyệt không hỗ trợ nhận dạng giọng nói. Hãy dùng Chrome.');
+        return;
+    }
+    if (recognition) { recognition.stop(); recognition = null; voiceBtn.classList.remove('recording'); return; }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SR();
+    recognition.lang = 'vi-VN';
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    voiceBtn.classList.add('recording');
+    recognition.onresult = e => {
+        const t = Array.from(e.results).map(r => r[0].transcript).join('');
+        msgInput.value = t;
+    };
+    recognition.onend = () => { voiceBtn.classList.remove('recording'); recognition = null; };
+    recognition.onerror = () => { voiceBtn.classList.remove('recording'); recognition = null; };
+    recognition.start();
+}
+
+// ===== AUTOCOMPLETE =====
+let acTimer = null;
+msgInput.addEventListener('input', () => {
+    clearTimeout(acTimer);
+    const q = msgInput.value.trim();
+    if (q.length < 2) { acBox.classList.remove('show'); return; }
+    acTimer = setTimeout(async () => {
+        try {
+            const res = await fetch('/api/search?q=' + encodeURIComponent(q));
+            const data = await res.json();
+            if (data.length === 0) { acBox.classList.remove('show'); return; }
+            acBox.innerHTML = data.map(d =>
+                `<div class="ac-item" onclick="selectAC('${d.name.replace(/'/g, "\\'")}')">
+                    <span class="ac-icon">${d.icon}</span>
+                    <span class="ac-name">${d.desc}</span>
+                    <span class="ac-price">${formatVND(d.price)}</span>
+                </div>`
+            ).join('');
+            acBox.classList.add('show');
+        } catch(e) { acBox.classList.remove('show'); }
+    }, 300);
+});
+function selectAC(name) {
+    msgInput.value = name;
+    acBox.classList.remove('show');
+    msgInput.focus();
+}
+function formatVND(n) { return n.toLocaleString('vi-VN') + 'đ'; }
+msgInput.addEventListener('blur', () => setTimeout(() => acBox.classList.remove('show'), 200));
+
+// ===== SCROLL =====
+chatArea.addEventListener('scroll', () => {
+    const gap = chatArea.scrollHeight - chatArea.scrollTop - chatArea.clientHeight;
+    scrollBtn.classList.toggle('show', gap > 120);
+});
+function scrollBottom() {
+    requestAnimationFrame(() => chatArea.scrollTo({ top: chatArea.scrollHeight, behavior: 'smooth' }));
+}
+
+// ===== WELCOME =====
+window.addEventListener('DOMContentLoaded', () => {
+    const w = document.createElement('div');
+    w.className = 'welcome';
+    w.innerHTML = `
+        <div class="w-head">
+            <div class="w-icon">🤖</div>
+            <div>
+                <div class="w-title">Xin chào! Tôi là trợ lý AI</div>
+                <div class="w-sub">Siêu Thị ABC — Hỗ trợ 24/7</div>
+            </div>
+        </div>
+        <div class="w-features">
+            <div class="w-feat" onclick="quickSend('coca cola')"><span>🔍</span> Tìm sản phẩm</div>
+            <div class="w-feat" onclick="quickSend('xem khuyến mãi')"><span>💰</span> Giá & khuyến mãi</div>
+            <div class="w-feat" onclick="quickSend('so sánh coca cola và pepsi')"><span>⚖️</span> So sánh SP</div>
+            <div class="w-feat" onclick="quickSend('tôi có 100k mua gì')"><span>💵</span> Gợi ý ngân sách</div>
+            <div class="w-feat" onclick="quickSend('combo')"><span>🎉</span> Combo tiết kiệm</div>
+            <div class="w-feat" onclick="quickSend('nấu lẩu cần gì')"><span>🍳</span> Gợi ý nấu ăn</div>
+        </div>
+        <div class="w-actions">
+            <button class="w-btn pri" onclick="quickSend('sản phẩm hot')">⭐ Bán chạy</button>
+            <button class="w-btn sec" onclick="quickSend('combo')">🎉 Combo</button>
+            <button class="w-btn sec" onclick="quickSend('bản đồ')">🗺️ Sơ đồ</button>
+            <button class="w-btn sec" onclick="quickSend('help')">❓ Hướng dẫn</button>
+        </div>
+    `;
+    chatArea.insertBefore(w, typingEl);
+    msgInput.focus();
+});
+
+// ===== MESSAGE HELPERS =====
+msgInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+
+function getTime() {
+    const n = new Date();
+    return n.getHours().toString().padStart(2,'0') + ':' + n.getMinutes().toString().padStart(2,'0');
+}
+function escapeHtml(t) {
+    const d = document.createElement('div');
+    d.textContent = t;
+    return d.innerHTML.replace(/\n/g, '<br>');
+}
+
+function addUserMessage(text) {
+    const row = document.createElement('div');
+    row.className = 'msg user';
+    row.innerHTML = `<div class="msg-body"><div class="bubble">${escapeHtml(text)}</div><div class="meta">${getTime()} ✓</div></div>`;
+    chatArea.insertBefore(row, typingEl);
+    scrollBottom();
+}
+
+function addBotMessage(text, html, suggestions) {
+    const row = document.createElement('div');
+    row.className = 'msg bot';
+    let content;
+    if (html) {
+        content = html;
+    } else {
+        content = escapeHtml(text);
+    }
+    let chipsHtml = '';
+    if (suggestions && suggestions.length > 0) {
+        chipsHtml = '<div class="suggest-chips">';
+        suggestions.forEach(s => {
+            chipsHtml += `<button class="suggest-chip" onclick="quickSend('${s.cmd.replace(/'/g, "\\'")}')">${s.label}</button>`;
+        });
+        chipsHtml += '</div>';
+    }
+    row.innerHTML = `
+        <div class="avatar">🤖</div>
+        <div class="msg-body">
+            <div class="bubble">${content}${chipsHtml}</div>
+            <div class="meta">🤖 Trợ lý · ${getTime()}</div>
+        </div>
+    `;
+    chatArea.insertBefore(row, typingEl);
+    scrollBottom();
+    playSound('receive');
+}
+
+function showTyping(show) {
+    typingEl.classList.toggle('show', show);
+    if (show) scrollBottom();
+}
+
+function getSuggestions(reply) {
+    const r = reply.toLowerCase();
+    if (r.includes('giỏ hàng') && !r.includes('trống'))
+        return [{label:'💳 Thanh toán',cmd:'thanh toán'},{label:'🗑️ Xóa giỏ',cmd:'xóa giỏ'}];
+    if (r.includes('đã thêm vào giỏ'))
+        return [{label:'🛒 Xem giỏ',cmd:'giỏ hàng'},{label:'💳 Thanh toán',cmd:'thanh toán'},{label:'🔍 Tìm thêm',cmd:'danh mục'}];
+    if (r.includes('khuyến mãi'))
+        return [{label:'🎉 Xem combo',cmd:'combo'}];
+    if (r.includes('gợi ý') || r.includes('tư vấn'))
+        return [{label:'🛒 Thêm giỏ',cmd:'mua'}];
+    if (r.includes('đơn hàng đã được ghi nhận') || r.includes('đã ghi nhận'))
+        return [{label:'🔍 Tiếp tục',cmd:'danh mục'},{label:'⭐ SP Hot',cmd:'sản phẩm hot'}];
+    if (r.includes('so sánh'))
+        return [{label:'🛒 Mua SP',cmd:'mua'}];
+    return [];
+}
+
+async function sendMessage() {
+    const text = msgInput.value.trim();
+    if (!text) return;
+    acBox.classList.remove('show');
+    addUserMessage(text);
+    msgInput.value = '';
+    msgInput.focus();
+    showTyping(true);
+    playSound('send');
+
+    try {
+        const res = await fetch('/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({message: text})
+        });
+        const data = await res.json();
+        await new Promise(r => setTimeout(r, 300 + Math.random() * 300));
+        showTyping(false);
+        const suggestions = getSuggestions(data.reply);
+        addBotMessage(data.reply, data.html, suggestions);
+
+        if (data.ai_active && !window._aiShown) {
+            $('aiStatus').textContent = '✨ AI Gemini đang hoạt động';
+            window._aiShown = true;
+        }
+
+        if (data.cart_count !== undefined) {
+            cartCountEl.textContent = data.cart_count;
+            if (data.cart_count > 0) {
+                cartCountEl.classList.add('glow');
+                cartCountEl.animate([{transform:'scale(1.5)'},{transform:'scale(1)'}], {duration:350, easing:'ease-out'});
+            } else {
+                cartCountEl.classList.remove('glow');
+            }
+        }
+    } catch(err) {
+        showTyping(false);
+        addBotMessage('⚠️ Lỗi kết nối server. Vui lòng thử lại!', null, []);
+    }
+}
+
+function quickSend(text) {
+    msgInput.value = text;
+    sendMessage();
+}
+</script>
+</body>
+</html>

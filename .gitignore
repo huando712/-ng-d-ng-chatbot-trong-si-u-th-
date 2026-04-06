@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.env
+chat_backup.py
+chat_v2_backup.py
+chat_v3_backup.py
+templates/index_backup.html
+templates/index_v2_backup.html
