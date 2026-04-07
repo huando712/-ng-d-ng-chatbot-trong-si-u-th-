@@ -392,6 +392,28 @@ def add_to_cart(product_name, quantity=1):
             cart.append({"tên": name, "giá": info["giá"], "số_lượng": quantity})
             session['cart'] = cart
             return name, info["giá"], quantity
+
+    # Fallback: tolerate minor typos (e.g. hà/há) when matching product names.
+    best_name = None
+    best_score = 0
+    for name in PRODUCTS.keys():
+        score = SequenceMatcher(None, product_name, name).ratio()
+        if score > best_score:
+            best_score = score
+            best_name = name
+
+    if best_name and best_score >= 0.72:
+        info = PRODUCTS[best_name]
+        cart = get_cart()
+        for item in cart:
+            if item["tên"] == best_name:
+                item["số_lượng"] += quantity
+                session['cart'] = cart
+                return best_name, info["giá"], item["số_lượng"]
+        cart.append({"tên": best_name, "giá": info["giá"], "số_lượng": quantity})
+        session['cart'] = cart
+        return best_name, info["giá"], quantity
+
     return None, 0, 0
 
 
@@ -535,6 +557,27 @@ def compare_products_handler(text):
     text_resp += f"  ⭐ Đánh giá cao hơn: {better[1]['mô_tả']} ({better[1].get('đánh_giá', 0)})"
     html_resp = html_compare_table(items)
     return {"text": text_resp, "html": html_resp}
+
+
+def parse_purchase_request(text):
+    """Extract quantity + product name from natural purchase phrases."""
+    m = re.search(r'\b(?:thêm|them|mua|đặt|dat|order|add)\b', text)
+    if not m:
+        return 1, ""
+
+    tail = text[m.end():].strip()
+    tail = re.sub(r'\b(?:vào giỏ|vao gio|giỏ hàng|gio hang)\b', ' ', tail)
+    tail = re.sub(r'\b(?:cho mình|cho minh|cho em|giúp mình|giup minh|giúp em|giup em|với|voi|nhé|nhe)\b', ' ', tail)
+
+    quantity = 1
+    # Only parse quantity when it is a leading standalone number (avoid 500g/330ml product sizes).
+    qty_match = re.match(r'^(\d+)\s*(?:x|cái|hộp|gói|chai|lon|cuộn|lốc|thùng|phần|suất)?\b', tail)
+    if qty_match:
+        quantity = max(1, int(qty_match.group(1)))
+        tail = tail[qty_match.end():].strip()
+
+    product_name = re.sub(r'\s+', ' ', tail).strip(" ,.;:-")
+    return quantity, product_name
 
 
 # ==================== AI CHAT ====================
@@ -800,21 +843,15 @@ def process_message(user_input):
                          f"  💰 Tiết kiệm: {format_price(discount)}\n"
                          f"  🛒 Tổng giỏ: {format_price(cart_total)}")
 
-        qty_match = re.search(r'(\d+)\s*(cái|hộp|gói|chai|lon|kg|lít|cuộn|lốc|thùng)?', text)
-        quantity = int(qty_match.group(1)) if qty_match else 1
-        clean = text
-        for kw in ["thêm", "them", "mua", "đặt", "dat", "order", "add", "vào giỏ", "vao gio",
-                    "giỏ hàng", "gio hang", str(quantity), "cái", "hộp", "gói", "chai", "lon", "kg", "lít", "cuộn", "lốc", "thùng"]:
-            clean = clean.replace(kw, "")
-        product_name = clean.strip()
+        quantity, product_name = parse_purchase_request(text)
         if product_name:
             name, price, qty = add_to_cart(product_name, quantity)
             if name:
                 info = PRODUCTS[name]
                 _, cart_total = get_cart_summary()
                 text_resp = f"✅ Đã thêm vào giỏ hàng:\n\n"
-                text_resp += f"  {info.get('hình', '📦')} {name.title()} x{qty}\n"
-                text_resp += f"  💰 {format_price(price * qty)}\n\n"
+                text_resp += f"  {info.get('hình', '📦')} {name.title()} +{quantity} (tổng {qty})\n"
+                text_resp += f"  💰 Tạm tính lần thêm: {format_price(price * quantity)}\n\n"
                 text_resp += f"  🛒 Tổng giỏ: {format_price(cart_total)}\n"
                 if cart_total >= 200000:
                     text_resp += "  🚚 Miễn phí giao hàng! ✨"
@@ -916,8 +953,8 @@ def index():
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    data = request.get_json()
-    user_message = data.get("message", "").strip()
+    data = request.get_json(silent=True) or {}
+    user_message = str(data.get("message", "")).strip()
     if not user_message:
         return jsonify({"reply": "Vui lòng nhập tin nhắn.", "html": None})
     result = process_message(user_message)
