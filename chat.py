@@ -959,14 +959,19 @@ def api_search():
 
 
 if __name__ == "__main__":
-    try:
-        from pyngrok import ngrok
-        public_url = ngrok.connect(5000)
-        print(f"\n{'='*50}")
-        print(f"🌐 LINK PUBLIC: {public_url.public_url}")
-        print(f"{'='*50}\n")
-    except Exception as e:
-        print(f"\n⚠️  Ngrok: {e}")
-        print("   Dùng cloudflared tunnel hoặc truy cập qua LAN.\n")
+    ngrok_token = os.environ.get("NGROK_AUTHTOKEN", "").strip()
+    if ngrok_token:
+        try:
+            from pyngrok import ngrok
+            ngrok.set_auth_token(ngrok_token)
+            public_url = ngrok.connect(5000)
+            print(f"\n{'='*50}")
+            print(f"🌐 LINK PUBLIC: {public_url.public_url}")
+            print(f"{'='*50}\n")
+        except Exception as e:
+            print(f"\n⚠️  Ngrok: {e}")
+            print("   Dùng cloudflared tunnel hoặc truy cập qua LAN.\n")
+    else:
+        print("ℹ️  Chưa cấu hình NGROK_AUTHTOKEN. Bỏ qua link public và chạy local/LAN.\n")
 
     app.run(debug=True, host="0.0.0.0", port=5000, use_reloader=False)
